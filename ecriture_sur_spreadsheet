@@ -1,0 +1,29 @@
+require_relative 'spamming_guadeloupe.rb'
+require_relative 'spamming_martinique.rb'
+require_relative 'spamming_guyane.rb'
+require_relative 'spamming_reunion.rb'
+require "google_drive"
+
+#Je fusionne mes 4 répertoires d'adresses emails de départements dans un seul et même hash que je renomme pour plus de lisibilité.
+$overseas_departments = $data_guadeloupe.merge!($data_martinique).merge!($data_guyane).merge!($data_reunion_island)
+puts $overseas_departments
+
+#J'enregistre les villes et les adresses emails associées dans un spreadsheet sur Google Drive
+session = GoogleDrive::Session.from_config("ta_session_googledrive")
+
+ws = session.spreadsheet_by_key("1HXHOryxIzbDudFa78jiyHgh9q8Vqz-EYxwIZfxpTAGg").worksheets[0]
+
+ws[1, 1] = "Ville"
+ws[1, 2] = "Email"
+ws.save
+
+l = 1
+
+$overseas_departments.each do |town, email|
+	ws [l = l + 1, 1] = "#{town}"
+	ws [l, 2] = "#{email}"
+
+ws.save
+ws.reload
+
+end
